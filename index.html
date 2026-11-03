@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Corsa in Città [MOBILE]</title>
+    <title>Corsa in Città 3D - Tesla Roadster Ultimate</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Share+Tech+Mono&display=swap');
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
 
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #87CEEB; /* Cielo diurno */
+            background-color: #70c5ce;
             font-family: 'Share Tech Mono', monospace;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
         #canvas-container {
@@ -25,23 +29,19 @@
             z-index: 1;
         }
 
-        /* --- STILE INTERFACCIA DIURNA --- */
         .neo-glass {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px) saturate(180%);
-            -webkit-backdrop-filter: blur(10px) saturate(180%);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            color: #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            color: #1d3557;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
         #ui-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10;
             pointer-events: none;
         }
@@ -52,43 +52,64 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 20px;
+            gap: 15px;
             width: 90%;
+            max-width: 800px;
             justify-content: space-between;
         }
 
         .hud-panel { 
-            padding: 10px 20px; 
+            padding: 8px 18px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            min-width: 100px; 
+            min-width: 110px; 
         }
-        .hud-label { font-size: 11px; color: #555; letter-spacing: 2px; margin-bottom: 4px; font-weight: bold; }
-        .hud-value { font-size: 28px; font-weight: bold; color: #111; }
+        .hud-label { font-size: 11px; color: #457b9d; letter-spacing: 2px; margin-bottom: 2px; font-weight: bold; }
+        .hud-value { font-size: 26px; font-weight: 700; color: #1d3557; font-family: 'Rajdhani', sans-serif; }
 
-        /* Life Panel */
         #life-panel {
             position: absolute;
-            top: 80px;
+            top: 85px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 8px;
-            padding: 8px 15px;
+            gap: 6px;
+            padding: 6px 14px;
         }
         .life-pip {
-            width: 20px;
+            width: 22px;
             height: 10px;
             background: #e63946;
-            border-radius: 2px;
-            transition: background 0.3s, opacity 0.3s;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(230, 57, 70, 0.3);
         }
         .life-pip.lost {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.15);
+            box-shadow: none;
         }
 
-        /* Cheat List */
+        #active-powerups {
+            position: absolute;
+            top: 135px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .powerup-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .badge-magnet { background: #0077b6; }
+        .badge-shield { background: #2a9d8f; }
+
         #cheat-list {
             position: absolute;
             top: 50%;
@@ -97,55 +118,51 @@
             text-align: right;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            padding: 15px;
+            gap: 8px;
+            padding: 12px 16px;
             pointer-events: none;
         }
-        .cheat-item {
-            color: #333;
-            font-size: 12px;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
+        .cheat-item { color: #1d3557; font-size: 11px; font-weight: bold; }
         .cheat-code {
-            color: #e63946;
+            color: #fff;
             font-weight: bold;
-            background: rgba(255,255,255,0.8);
-            padding: 2px 5px;
-            border-radius: 3px;
+            background: #e63946;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
         }
 
         #dashboard {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
+            bottom: 25px;
+            left: 25px;
             display: flex;
             align-items: flex-end;
             gap: 15px;
-            padding: 15px;
+            padding: 12px 20px;
         }
         .gauge-circle {
-            width: 80px;
-            height: 80px;
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
-            border: 3px solid rgba(0, 0, 0, 0.1);
-            border-top: 3px solid #1d3557;
-            border-right: 3px solid #1d3557;
+            border: 4px solid rgba(29, 53, 87, 0.15);
+            border-top: 4px solid #e63946;
+            border-right: 4px solid #e63946;
             display: flex;
             align-items: center;
             justify-content: center;
             transform: rotate(-45deg);
-            background: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.5);
         }
         .gauge-inner { transform: rotate(45deg); text-align: center; }
 
         #nitro-bar-container {
-            width: 250px;
-            height: 12px;
+            width: 200px;
+            height: 14px;
             background: rgba(0,0,0,0.1);
-            border: 1px solid #1d3557;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            border: 1px solid rgba(0,0,0,0.15);
+            border-radius: 7px;
+            margin-bottom: 6px;
             position: relative;
             overflow: hidden;
         }
@@ -157,246 +174,139 @@
             transition: transform 0.1s;
         }
 
-        /* --- CONTROLLI MOBILE --- */
         #mobile-controls {
             display: none;
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 180px;
+            bottom: 0; left: 0; width: 100%; height: 180px;
             z-index: 20;
         }
-
         .mobile-btn {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 75px; height: 75px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: #333;
-            font-weight: bold;
-            user-select: none;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: #1d3557; font-weight: bold;
             touch-action: manipulation;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
             pointer-events: auto;
         }
+        .mobile-btn:active { background: rgba(230, 57, 70, 0.3); transform: scale(0.95); }
+        .btn-left { bottom: 35px; left: 25px; }
+        .btn-right { bottom: 35px; left: 115px; }
+        .btn-jump { bottom: 120px; right: 25px; width: 65px; height: 65px; color: #457b9d; font-size: 14px; }
+        .btn-boost { bottom: 35px; right: 25px; width: 85px; height: 85px; color: #e76f51; }
 
-        .mobile-btn:active {
-            background: rgba(29, 53, 87, 0.2);
-            transform: scale(0.95);
-        }
-
-        .btn-left { bottom: 40px; left: 30px; }
-        .btn-right { bottom: 40px; left: 130px; }
-        .btn-boost { bottom: 40px; right: 30px; width: 90px; height: 90px; color: #e76f51; }
-
-        /* Input Trucchi Mobile */
         #mobile-cheat-trigger {
             display: none;
             position: absolute;
-            top: 100px;
-            right: 20px;
-            padding: 10px 20px;
-            font-size: 12px;
-            z-index: 30;
-            pointer-events: auto;
-            font-weight: bold;
+            top: 120px; right: 20px;
+            padding: 8px 16px; font-size: 11px;
+            z-index: 30; pointer-events: auto; font-weight: bold;
         }
-
         #mobile-cheat-panel {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 100;
-            background: rgba(255,255,255,0.9);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background: rgba(255,255,255,0.92);
+            flex-direction: column; align-items: center; justify-content: center;
             pointer-events: auto;
         }
         #mobile-cheat-input {
-            background: #fff;
-            border: 2px solid #1d3557;
-            color: #1d3557;
-            padding: 15px;
-            font-size: 20px;
-            font-family: 'Share Tech Mono';
-            width: 80%;
-            max-width: 400px;
-            text-transform: uppercase;
-            text-align: center;
-            outline: none;
-            border-radius: 8px;
+            background: #fff; border: 2px solid #1d3557; color: #1d3557;
+            padding: 12px 20px; font-size: 18px; font-family: 'Share Tech Mono';
+            width: 80%; max-width: 320px; text-transform: uppercase; text-align: center;
+            outline: none; border-radius: 8px;
         }
         .close-cheat {
-            margin-top: 20px;
-            background: #1d3557;
-            border: none;
-            color: #fff;
-            padding: 10px 30px;
-            font-family: 'Share Tech Mono';
-            border-radius: 5px;
-            cursor: pointer;
+            margin-top: 15px; background: #1d3557; border: none; color: #fff;
+            padding: 10px 25px; font-family: 'Share Tech Mono'; border-radius: 6px; cursor: pointer;
         }
 
         @media (max-width: 1024px) {
             #mobile-controls { display: block; }
             #mobile-cheat-trigger { display: block; }
             #cheat-list { display: none; }
-            #dashboard { transform: scale(0.8); bottom: 10px; left: 10px; }
+            #dashboard { transform: scale(0.85); bottom: 10px; left: 10px; }
         }
         
         .toast {
-            position: absolute;
-            top: 20%;
-            left: 50%;
+            position: absolute; top: 25%; left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px 40px;
-            font-size: 24px;
-            opacity: 0;
-            transition: opacity 0.5s;
-            z-index: 200;
-            pointer-events: none;
-            text-align: center;
-            font-weight: bold;
+            padding: 15px 30px; font-size: 24px; opacity: 0;
+            transition: opacity 0.4s ease; z-index: 200;
+            pointer-events: none; text-align: center; font-weight: bold;
         }
-        .warning-text { color: #e63946; text-shadow: 0 0 10px rgba(230, 57, 70, 0.5); font-size: 32px; display: none; }
+        .warning-text { color: #e63946; text-shadow: 0 0 10px rgba(230, 57, 70, 0.4); font-size: 28px; display: none; }
         
         #cheat-indicator {
-            position: absolute;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #fff;
-            background: #1d3557;
-            font-size: 14px;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.5s;
-            padding: 8px 15px;
-            border-radius: 20px;
-            pointer-events: none;
-            white-space: nowrap;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: absolute; bottom: 110px; left: 50%;
+            transform: translateX(-50%); color: #fff; background: #1d3557;
+            font-size: 13px; font-weight: bold; opacity: 0; transition: opacity 0.4s;
+            padding: 6px 16px; border-radius: 20px; pointer-events: none;
+            white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         #game-timer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: #333;
-            font-size: 14px;
-            font-weight: bold;
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 5px;
+            position: absolute; top: 20px; right: 20px; color: #1d3557;
+            font-size: 13px; font-weight: bold; border: 1px solid rgba(0,0,0,0.08);
+            padding: 6px 12px; background: rgba(255,255,255,0.7); border-radius: 6px;
         }
 
-        /* --- SCHERMATA START --- */
-        #start-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(135, 206, 235, 0.9); 
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 400;
-            pointer-events: all;
+        #start-screen, #game-over-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(135, 206, 235, 0.85); backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 400; pointer-events: all;
         }
+        #game-over-screen { display: none; z-index: 300; background: rgba(255, 255, 255, 0.9); }
+        
         .start-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 60px;
-            color: #1d3557;
-            font-weight: bold;
-            margin-bottom: 30px;
-            text-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-family: 'Rajdhani', sans-serif; font-size: 52px; color: #1d3557;
+            font-weight: 700; margin-bottom: 25px; text-shadow: 0 4px 10px rgba(0,0,0,0.1);
             text-align: center;
         }
         .slider-container {
-            background: rgba(255, 255, 255, 0.6);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(0,0,0,0.1);
-            text-align: center;
-            margin-bottom: 30px;
-            width: 80%;
-            max-width: 300px;
+            background: rgba(255, 255, 255, 0.8); padding: 20px 30px;
+            border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); text-align: center;
+            margin-bottom: 25px; width: 85%; max-width: 340px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
         }
-        input[type=range] {
-            width: 100%;
-            margin: 15px 0;
-        }
+        input[type=range] { width: 100%; margin: 12px 0; accent-color: #e63946; }
         
         .main-btn {
-            padding: 15px 50px;
-            background: #1d3557;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Share Tech Mono';
-            font-size: 24px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: 0.3s;
-            pointer-events: auto;
+            padding: 14px 45px; background: #1d3557; color: #fff; border: none;
+            border-radius: 8px; font-family: 'Share Tech Mono'; font-size: 22px;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            transition: all 0.2s ease; box-shadow: 0 6px 15px rgba(29, 53, 87, 0.3);
         }
-        .main-btn:hover {
-            background: #457b9d; 
-            transform: scale(1.05);
-        }
+        .main-btn:hover { background: #457b9d; transform: translateY(-2px); }
 
-        /* --- SCHERMATA GAME OVER --- */
-        #game-over-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(5px);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 300;
-            pointer-events: all;
-        }
-        .go-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 60px;
-            color: #e63946;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
+        .go-title { font-family: 'Rajdhani', sans-serif; font-size: 56px; color: #e63946; font-weight: 700; margin-bottom: 10px; }
     </style>
     
-    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
     <div id="canvas-container"></div>
 
-    <!-- Livello UI -->
     <div id="ui-layer">
         <div id="top-hud">
             <div class="hud-panel neo-glass">
                 <div class="hud-label">DISTANZA</div>
-                <div class="hud-value" id="score-val">0</div>
+                <div class="hud-value" id="score-val">0 m</div>
+            </div>
+            <div class="hud-panel neo-glass">
+                <div class="hud-label">MONETE</div>
+                <div class="hud-value" id="coins-val" style="color: #d4af37;">0</div>
             </div>
             <div class="hud-panel neo-glass">
                 <div class="hud-label">STATO</div>
-                <div class="hud-value" id="status-val" style="font-size: 18px; color:#1d3557;">INTESTAZIONE</div>
+                <div class="hud-value" id="status-val" style="font-size: 16px; color:#1d3557;">PRONTO</div>
             </div>
         </div>
 
@@ -405,10 +315,15 @@
             <div class="life-pip"></div><div class="life-pip"></div><div class="life-pip"></div>
         </div>
 
+        <div id="active-powerups">
+            <div class="powerup-badge badge-magnet" id="badge-magnet">🧲 MAGNETE</div>
+            <div class="powerup-badge badge-shield" id="badge-shield">🛡️ SCUDO</div>
+        </div>
+
         <div id="game-timer">TEMPO: <span id="time-val">0.0</span>s</div>
 
-        <!-- Lista Trucchi Desktop -->
         <div id="cheat-list" class="neo-glass">
+            <div class="cheat-item">SALTO: <span class="cheat-code">E</span></div>
             <div class="cheat-item">MODALITÀ DIO: <span class="cheat-code">DIO</span></div>
             <div class="cheat-item">TURBO INF: <span class="cheat-code">TURBO</span></div>
             <div class="cheat-item">CAOS: <span class="cheat-code">CAOS</span></div>
@@ -433,7 +348,6 @@
         <div class="toast warning-text" id="collision-warn">INCIDENTE!</div>
     </div>
 
-    <!-- Overlay Controlli Mobile -->
     <button id="mobile-cheat-trigger" class="neo-glass">TRUCCHI</button>
     
     <div id="mobile-cheat-panel">
@@ -445,53 +359,59 @@
     <div id="mobile-controls">
         <div class="mobile-btn btn-left" id="mob-left"><</div>
         <div class="mobile-btn btn-right" id="mob-right">></div>
+        <div class="mobile-btn btn-jump" id="mob-jump">SALTO</div>
         <div class="mobile-btn btn-boost" id="mob-boost">TURBO</div>
     </div>
 
-    <!-- Schermata Start / Impostazioni -->
     <div id="start-screen">
-        <div class="start-title">CORSA IN CITTÀ</div>
+        <div class="start-title">TESLA ROADSTER ULTIMATE</div>
         <div class="slider-container">
-            <div class="hud-label" style="font-size:14px; margin-bottom:5px;">DENSITÀ TRAFFICO</div>
+            <div class="hud-label" style="font-size:13px; margin-bottom:5px;">DENSITÀ TRAFFICO</div>
             <input type="range" id="density-slider" min="0" max="100" value="50">
-            <div class="hud-value" id="density-val" style="font-size:24px;">50%</div>
+            <div class="hud-value" id="density-val" style="font-size:22px;">50%</div>
         </div>
         <button class="main-btn" id="start-btn">GIOCA</button>
     </div>
 
-    <!-- Schermata Game Over -->
     <div id="game-over-screen">
         <div class="go-title">VEICOLO DISTRUTTO</div>
-        <p style="color:#555; font-family:'Share Tech Mono'; font-size: 18px;">L'auto necessita di riparazioni.</p>
-        <button class="main-btn" id="restart-btn" style="margin-top:20px;">RIPROVA</button>
+        <p style="color:#555; font-family:'Share Tech Mono'; font-size: 16px; margin-bottom: 20px;">Hai collezionato <span id="final-coins" style="font-weight:bold; color:#d4af37;">0</span> monete!</p>
+        <button class="main-btn" id="restart-btn">RIPROVA</button>
     </div>
 
     <script>
-        // --- CONFIGURAZIONE E STATO ---
         const CONFIG = {
-            laneWidth: 3.5,
-            speed: { base: 0.5, max: 1.2, nitro: 2.2, current: 0.8 },
-            nitro: { amount: 100, drain: 0.8, regen: 0.15 },
-            camera: { shake: 0, fovBase: 70, fovNitro: 90 },
+            laneWidth: 3.8,
+            speed: { base: 0.6, max: 1.4, nitro: 2.3, current: 0.6 },
+            nitro: { amount: 100, drain: 0.7, regen: 0.2 },
+            camera: { shake: 0, fovBase: 65, fovNitro: 85 },
             cheats: { god: false, infinite: false, chaos: false }
         };
 
         const STATE = {
-            playing: false, // Disabilitato finché non si preme "Gioca"
+            playing: false,
             gameOver: false,
             score: 0,
+            coins: 0,
             lives: 6,
-            frame: 0,
             cheatBuffer: "",
-            randomCheatTriggered: false,
             startTime: 0,
-            trafficDensity: 50
+            trafficDensity: 50,
+            jumping: false,
+            jumpY: 0,
+            jumpVelY: 0,
+            gravity: 28,
+            // Powerups
+            magnetActive: false,
+            magnetTimer: 0,
+            shieldActive: false
         };
 
         let activeCheatTimers = { god: null, infinite: null, chaos: null };
         let spawnTimer = null;
+        let itemTimer = null;
+        let rampTimer = null;
 
-        // --- GESTIONE SCHERMATA INIZIALE ---
         document.getElementById('density-slider').addEventListener('input', (e) => {
             document.getElementById('density-val').innerText = e.target.value + '%';
         });
@@ -505,132 +425,245 @@
             startSpawning();
         });
 
-        // --- SETUP THREE.JS (DIURNO) ---
+        // --- THREE.JS SETUP ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.FogExp2(0x87CEEB, 0.008);
+        scene.background = new THREE.Color(0x70c5ce);
+        scene.fog = new THREE.FogExp2(0x70c5ce, 0.004);
 
         const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth/window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 3.5, 9);
+        camera.position.set(0, 4, 10);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // --- ILLUMINAZIONE ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        // --- LUCI ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
-        const sunLight = new THREE.DirectionalLight(0xffffee, 1.2);
-        sunLight.position.set(20, 50, 20);
-        sunLight.castShadow = false;
+        const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
+        sunLight.position.set(30, 60, 20);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 150;
+        const d = 40;
+        sunLight.shadow.camera.left = -d;
+        sunLight.shadow.camera.right = d;
+        sunLight.shadow.camera.top = d;
+        sunLight.shadow.camera.bottom = -d;
         scene.add(sunLight);
 
-        // --- ASSET ---
-        const roadMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.8, metalness: 0.1 });
-        const carPaintMat = new THREE.MeshStandardMaterial({ color: 0xe63946, roughness: 0.4, metalness: 0.3 }); 
-        const tireMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-        const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.8 });
+        // --- MATERIALI GLOBALI ---
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x33333b, roughness: 0.8 });
+        const teslaRedMat = new THREE.MeshStandardMaterial({ color: 0xcc0000, roughness: 0.2, metalness: 0.7 });
+        const tireMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+        const glassMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.85 });
+        const coinMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8, roughness: 0.2 });
+        const shieldBubbleMat = new THREE.MeshBasicMaterial({ color: 0x2a9d8f, transparent: true, opacity: 0.35, wireframe: true });
 
-        // Strada
-        const roadGeo = new THREE.PlaneGeometry(30, 400);
+        // Strada & Marciapiedi
+        const roadGeo = new THREE.PlaneGeometry(16, 400);
         const road = new THREE.Mesh(roadGeo, roadMat);
         road.rotation.x = -Math.PI / 2;
         road.position.z = -100;
+        road.receiveShadow = true;
         scene.add(road);
 
-        // Strisce pedonali
         const stripes = [];
-        for(let i=0; i<12; i++){
-            const sGeo = new THREE.PlaneGeometry(0.3, 4);
+        for(let i=0; i<25; i++){
+            const sGeo = new THREE.PlaneGeometry(0.25, 4);
             const sMat = new THREE.MeshBasicMaterial({color: 0xffffff});
             const stripeLeft = new THREE.Mesh(sGeo, sMat);
             const stripeRight = new THREE.Mesh(sGeo, sMat);
             stripeLeft.rotation.x = -Math.PI/2;
             stripeRight.rotation.x = -Math.PI/2;
-            stripeLeft.position.x = -CONFIG.laneWidth/2 - 1.7;
-            stripeRight.position.x = CONFIG.laneWidth/2 + 1.7;
+            stripeLeft.position.x = -CONFIG.laneWidth / 2;
+            stripeRight.position.x = CONFIG.laneWidth / 2;
+            stripeLeft.position.z = -i * 16;
+            stripeRight.position.z = -i * 16;
             scene.add(stripeLeft);
             scene.add(stripeRight);
             stripes.push(stripeLeft, stripeRight);
         }
 
-        // Marciapiedi
-        const sidewalkGeo = new THREE.BoxGeometry(10, 0.4, 400);
-        const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 1.0 });
+        const sidewalkGeo = new THREE.BoxGeometry(4, 0.3, 400);
+        const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0xc8c8c8, roughness: 0.9 });
         const swLeft = new THREE.Mesh(sidewalkGeo, sidewalkMat);
-        swLeft.position.set(-15, 0.2, -100);
+        swLeft.position.set(-10, 0.15, -100);
+        swLeft.receiveShadow = true;
         const swRight = new THREE.Mesh(sidewalkGeo, sidewalkMat);
-        swRight.position.set(15, 0.2, -100);
+        swRight.position.set(10, 0.15, -100);
+        swRight.receiveShadow = true;
         scene.add(swLeft);
         scene.add(swRight);
 
-        // Edifici Diurni (Senza quadrati neri/finestre)
+        const grassGeo = new THREE.PlaneGeometry(100, 400);
+        const grassMat = new THREE.MeshStandardMaterial({ color: 0x76b852, roughness: 1.0 });
+        const grassLeft = new THREE.Mesh(grassGeo, grassMat);
+        grassLeft.rotation.x = -Math.PI / 2;
+        grassLeft.position.set(-62, -0.01, -100);
+        grassLeft.receiveShadow = true;
+        const grassRight = new THREE.Mesh(grassGeo, grassMat);
+        grassRight.rotation.x = -Math.PI / 2;
+        grassRight.position.set(62, -0.01, -100);
+        grassRight.receiveShadow = true;
+        scene.add(grassLeft);
+        scene.add(grassRight);
+
+        // Ambramura & Alberi
         const buildings = [];
-        const buildingColors = [0xdddddd, 0xeeeeee, 0xdcdcdc, 0xc0c0c0, 0xf5f5dc];
-        const buildingGeo = new THREE.BoxGeometry(1, 1, 1);
+        const props = [];
+        const buildingColors = [0xf4f1de, 0xe0e1dd, 0xf7d6bf, 0xd8e2dc, 0xffcad4];
+        
+        function createTree(x, z) {
+            const group = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2.5, 8), new THREE.MeshStandardMaterial({ color: 0x5c4033 }));
+            trunk.position.y = 1.25; trunk.castShadow = true; group.add(trunk);
+            const leaves = new THREE.Mesh(new THREE.ConeGeometry(2, 4.5, 8), new THREE.MeshStandardMaterial({ color: 0x2d6a4f }));
+            leaves.position.y = 4.5; leaves.castShadow = true; group.add(leaves);
+            group.position.set(x, 0, z); scene.add(group); props.push(group);
+        }
+
         function createBuilding(x, z) {
-            const h = 15 + Math.random() * 40;
-            const w = 6 + Math.random() * 8;
-            const d = 6 + Math.random() * 8;
+            const h = 12 + Math.random() * 25;
+            const w = 7 + Math.random() * 4;
+            const d = 8 + Math.random() * 6;
             const group = new THREE.Group();
             
-            const color = buildingColors[Math.floor(Math.random() * buildingColors.length)];
-            const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.9 });
-            const b = new THREE.Mesh(buildingGeo, mat);
-            b.scale.set(w, h, d);
-            b.position.y = h/2;
-            group.add(b);
-            
-            group.position.set(x, 0, z);
-            scene.add(group);
-            buildings.push(group);
+            const b = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: buildingColors[Math.floor(Math.random() * buildingColors.length)] }));
+            b.scale.set(w, h, d); b.position.y = h/2; b.castShadow = true; b.receiveShadow = true; group.add(b);
+
+            const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.6, d + 0.4), new THREE.MeshStandardMaterial({ color: 0x4a4e69 }));
+            roof.position.y = h + 0.3; roof.castShadow = true; group.add(roof);
+
+            const winMat = new THREE.MeshStandardMaterial({ color: 0xa8dadc, roughness: 0.2, metalness: 0.8 });
+            const rows = Math.floor(h / 3);
+            const cols = Math.floor(w / 2.2);
+
+            for (let r = 1; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const win = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.4), winMat);
+                    win.position.set(-((cols - 1) * 2.2) / 2 + c * 2.2, r * 3, d / 2 + 0.05);
+                    group.add(win);
+                }
+            }
+            group.position.set(x, 0, z); scene.add(group); buildings.push(group);
         }
-        for(let i=0; i<30; i++) {
-            createBuilding(-25 - Math.random()*10, -i * 35);
-            createBuilding(25 + Math.random()*10, -i * 35);
+
+        for(let i=0; i<25; i++) {
+            createBuilding(-17 - Math.random()*5, -i * 30);
+            createBuilding(17 + Math.random()*5, -i * 30);
+            createTree(-9.5, -i * 30 + 15);
+            createTree(9.5, -i * 30 + 15);
         }
 
-        // Auto del Giocatore
-        const carGroup = new THREE.Group();
-        const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.7, 4.0), carPaintMat);
-        chassis.position.y = 0.6;
-        carGroup.add(chassis);
-        
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.6, 2.2), glassMat);
-        cabin.position.set(0, 1.25, -0.2);
-        carGroup.add(cabin);
-        
-        const headlightGeo = new THREE.BoxGeometry(0.4, 0.2, 0.1);
-        const hlMat = new THREE.MeshStandardMaterial({color: 0xeeeeee, metalness: 0.5});
-        const hlLeft = new THREE.Mesh(headlightGeo, hlMat); hlLeft.position.set(0.7, 0.7, -2.05);
-        const hlRight = new THREE.Mesh(headlightGeo, hlMat); hlRight.position.set(-0.7, 0.7, -2.05);
-        carGroup.add(hlLeft, hlRight);
+        // TESLA ROADSTER
+        function createTeslaRoadster() {
+            const car = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.45, 4.2), teslaRedMat);
+            body.position.y = 0.45; body.castShadow = true; car.add(body);
 
-        const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 24);
-        const wPositions = [ [1.0, 0.4, 1.3], [-1.0, 0.4, 1.3], [1.0, 0.4, -1.2], [-1.0, 0.4, -1.2] ];
-        carGroup.userData.wheels = [];
-        wPositions.forEach(pos => {
-            const w = new THREE.Mesh(wheelGeo, tireMat); 
-            w.rotation.z = Math.PI/2; 
-            w.position.set(...pos); 
-            carGroup.add(w); 
-            carGroup.userData.wheels.push(w);
-        });
+            const hood = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.2, 1.5), teslaRedMat);
+            hood.position.set(0, 0.5, -1.2); car.add(hood);
 
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.45, 1.9), glassMat);
+            cab.position.set(0, 0.85, -0.1); cab.castShadow = true; car.add(cab);
+
+            const spoiler = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 0.3), teslaRedMat);
+            spoiler.position.set(0, 0.72, 1.95); car.add(spoiler);
+
+            const ledMat = new THREE.MeshBasicMaterial({ color: 0xe0ffff });
+            const ledStrip = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.06, 0.1), ledMat);
+            ledStrip.position.set(0, 0.52, -2.11); car.add(ledStrip);
+
+            const tailLedMat = new THREE.MeshBasicMaterial({ color: 0xff0033 });
+            const tailLed = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.08, 0.1), tailLedMat);
+            tailLed.position.set(0, 0.6, 2.11); car.add(tailLed);
+
+            // Scudo sferico protettivo
+            const shieldBubble = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 16), shieldBubbleMat);
+            shieldBubble.position.y = 0.8;
+            shieldBubble.name = "shieldMesh";
+            shieldBubble.visible = false;
+            car.add(shieldBubble);
+
+            const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.35, 24);
+            const rimGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.36, 5);
+            const rimMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.2 });
+
+            const wPos = [ [1.02, 0.38, 1.25], [-1.02, 0.38, 1.25], [1.02, 0.38, -1.25], [-1.02, 0.38, -1.25] ];
+            car.userData.wheels = [];
+
+            wPos.forEach(pos => {
+                const wGroup = new THREE.Group();
+                const w = new THREE.Mesh(wheelGeo, tireMat); w.rotation.z = Math.PI/2; w.castShadow = true;
+                const rim = new THREE.Mesh(rimGeo, rimMat); rim.rotation.z = Math.PI/2;
+                wGroup.add(w, rim); wGroup.position.set(...pos); car.add(wGroup);
+                car.userData.wheels.push(wGroup);
+            });
+
+            return car;
+        }
+
+        const carGroup = createTeslaRoadster();
         scene.add(carGroup);
 
-        const exhaustMat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.5});
-        const exhaust = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.5, 8), exhaustMat);
-        exhaust.rotation.x = Math.PI/2; exhaust.position.set(0, 0.4, 2.5); exhaust.visible = false;
+        const exhaustMat = new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0.7});
+        const exhaust = new THREE.Mesh(new THREE.ConeGeometry(0.25, 2.2, 8), exhaustMat);
+        exhaust.rotation.x = Math.PI/2; exhaust.position.set(0, 0.4, 2.6); exhaust.visible = false;
         carGroup.add(exhaust);
 
-        // Traffico (Nemici)
+        // OGGETTI, POWERUPS E RAMPE
+        const coins = [];
+        const powerups = [];
+        const ramps = [];
+
+        function spawnCoin() {
+            if(!STATE.playing || STATE.gameOver) return;
+            const lane = Math.floor(Math.random() * 3) - 1;
+            const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.15, 16), coinMat);
+            coin.rotation.x = Math.PI / 2; coin.position.set(lane * CONFIG.laneWidth, 1.0, -250);
+            coin.castShadow = true; scene.add(coin); coins.push(coin);
+        }
+
+        function spawnPowerup() {
+            if(!STATE.playing || STATE.gameOver) return;
+            const lane = Math.floor(Math.random() * 3) - 1;
+            const type = Math.random() > 0.5 ? 'magnet' : 'shield';
+            const color = type === 'magnet' ? 0x0077b6 : 0x2a9d8f;
+            
+            const pMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.7), new THREE.MeshStandardMaterial({color: color, metalness: 0.8, roughness: 0.2}));
+            pMesh.position.set(lane * CONFIG.laneWidth, 1.2, -250);
+            pMesh.userData = { type: type };
+            pMesh.castShadow = true; scene.add(pMesh); powerups.push(pMesh);
+        }
+
+        function spawnRamp() {
+            if(!STATE.playing || STATE.gameOver) return;
+            const lane = Math.floor(Math.random() * 3) - 1;
+            
+            const rGroup = new THREE.Group();
+            const rMesh = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 4.0), new THREE.MeshStandardMaterial({color: 0xffb703, roughness: 0.3}));
+            rMesh.rotation.x = -0.2;
+            rMesh.position.set(0, 0.2, 0);
+            rMesh.castShadow = true;
+            rGroup.add(rMesh);
+            
+            rGroup.position.set(lane * CONFIG.laneWidth, 0, -250);
+            scene.add(rGroup);
+            ramps.push(rGroup);
+        }
+
+        // TRAFFICO
         const enemies = [];
-        const trafficColors = [0x113355, 0xdddddd, 0x222222, 0x228822, 0x882222, 0xaaaaaa];
-        
+        const trafficColors = [0x2a9d8f, 0xe76f51, 0x264653, 0xf4a261, 0x1d3557, 0x6c757d];
+
         function spawnEnemy() {
             if(!STATE.playing || STATE.gameOver) return;
             const lane = Math.floor(Math.random() * 3) - 1;
@@ -638,97 +671,83 @@
             const group = new THREE.Group();
             
             const color = trafficColors[Math.floor(Math.random() * trafficColors.length)];
-            const tMat = new THREE.MeshStandardMaterial({color: color, roughness: 0.5});
+            const tMat = new THREE.MeshStandardMaterial({color: color, roughness: 0.4});
             
-            const isVan = Math.random() > 0.5;
-            if(isVan) {
-                const body = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.8, 4.5), tMat);
-                body.position.y = 1.1; group.add(body);
-                const windshield = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.8), glassMat);
-                windshield.position.set(0, 1.4, -2.26); group.add(windshield);
-            } else {
-                const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.7, 4.0), tMat);
-                body.position.y = 0.6; group.add(body);
-                const cab = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.6, 2.0), glassMat); 
-                cab.position.set(0, 1.25, 0.2); group.add(cab);
-            }
-            
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.6, 4.0), tMat);
+            body.position.y = 0.55; body.castShadow = true; group.add(body);
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.55, 2.0), glassMat); 
+            cab.position.set(0, 1.1, 0.1); cab.castShadow = true; group.add(cab);
+
+            const wGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.3, 16);
+            const wPos = [ [1.0, 0.38, 1.2], [-1.0, 0.38, 1.2], [1.0, 0.38, -1.2], [-1.0, 0.38, -1.2] ];
             group.userData.wheels = [];
-            wPositions.forEach(pos => {
-                const w = new THREE.Mesh(wheelGeo, tireMat); 
-                w.rotation.z = Math.PI/2; w.position.set(...pos); 
+            wPos.forEach(pos => {
+                const w = new THREE.Mesh(wGeo, tireMat); w.rotation.z = Math.PI/2; w.position.set(...pos); w.castShadow = true;
                 group.add(w); group.userData.wheels.push(w);
             });
             
-            group.position.set(x, 0, -250);
-            scene.add(group);
-            enemies.push(group);
+            group.position.set(x, 0, -250); scene.add(group); enemies.push(group);
         }
 
-        // Funzione per avviare il timer dei nemici in base alla densità
         function startSpawning() {
             if(spawnTimer) clearInterval(spawnTimer);
+            if(itemTimer) clearInterval(itemTimer);
+            if(rampTimer) clearInterval(rampTimer);
+
             if(STATE.trafficDensity > 0) {
-                // Da 0 a 100 scala il tempo di spawn tra 3000ms e 400ms
-                const interval = 3000 - ((3000 - 400) * (STATE.trafficDensity / 100));
+                const interval = 2800 - ((2800 - 350) * (STATE.trafficDensity / 100));
                 spawnTimer = setInterval(spawnEnemy, interval);
             }
+            itemTimer = setInterval(() => { spawnCoin(); if(Math.random() < 0.3) spawnPowerup(); }, 1200);
+            rampTimer = setInterval(spawnRamp, 4500);
         }
 
         const particles = [];
-        const particleGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-        
         function createCrashEffect(pos) {
-            for(let i=0; i<15; i++) {
-                const mesh = new THREE.Mesh(particleGeo, new THREE.MeshStandardMaterial({color: 0x555555}));
-                mesh.position.copy(pos);
-                mesh.position.y += 1;
-                mesh.userData.vel = new THREE.Vector3((Math.random() - 0.5) * 2.0, Math.random() * 2.0, (Math.random() - 0.5) * 2.0);
-                scene.add(mesh);
-                particles.push(mesh);
+            for(let i=0; i<25; i++) {
+                const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), new THREE.MeshStandardMaterial({color: Math.random() > 0.5 ? 0xcc0000 : 0xffb703}));
+                mesh.position.copy(pos); mesh.position.y += 0.8;
+                mesh.userData.vel = new THREE.Vector3((Math.random() - 0.5) * 3.0, Math.random() * 3.5 + 1.0, (Math.random() - 0.5) * 3.0);
+                scene.add(mesh); particles.push(mesh);
             }
         }
 
-        // --- LOGICA DI GIOCO ---
+        function performJump(power = 11.5) {
+            if (!STATE.jumping && STATE.playing && !STATE.gameOver) {
+                STATE.jumping = true;
+                STATE.jumpVelY = power;
+            }
+        }
+
+        // CONTROLLI
         let playerX = 0;
         let playerVelX = 0;
-        const keys = { w:false, a:false, s:false, d:false, space:false };
+        const keys = { a:false, d:false, space:false };
 
-        // --- TOUCH MOBILE ---
         const mobLeft = document.getElementById('mob-left');
         const mobRight = document.getElementById('mob-right');
         const mobBoost = document.getElementById('mob-boost');
+        const mobJump = document.getElementById('mob-jump');
         const mobileCheatInput = document.getElementById('mobile-cheat-input');
         const mobileCheatPanel = document.getElementById('mobile-cheat-panel');
 
         function bindTouch(elem, keyStart, keyEnd) {
-            elem.addEventListener('touchstart', (e) => { 
-                e.preventDefault(); 
-                if(keyStart === 'a') keys.a = true;
-                if(keyStart === 'd') keys.d = true;
-                if(keyStart === ' ') keys.space = true;
-            });
-            elem.addEventListener('touchend', (e) => { 
-                e.preventDefault();
-                if(keyEnd === 'a') keys.a = false;
-                if(keyEnd === 'd') keys.d = false;
-                if(keyEnd === ' ') keys.space = false;
-            });
+            elem.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyStart] = true; });
+            elem.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyEnd] = false; });
         }
 
         bindTouch(mobLeft, 'a', 'a');
         bindTouch(mobRight, 'd', 'd');
-        bindTouch(mobBoost, ' ', ' ');
+        bindTouch(mobBoost, 'space', 'space');
+
+        mobJump.addEventListener('touchstart', (e) => { e.preventDefault(); performJump(); });
 
         document.getElementById('mobile-cheat-trigger').addEventListener('click', () => {
-            mobileCheatPanel.style.display = 'flex';
-            mobileCheatInput.value = "";
-            mobileCheatInput.focus();
+            mobileCheatPanel.style.display = 'flex'; mobileCheatInput.value = ""; mobileCheatInput.focus();
         });
 
         document.getElementById('close-mobile-cheat').addEventListener('click', () => {
-            mobileCheatPanel.style.display = 'none';
-            mobileCheatInput.blur();
+            mobileCheatPanel.style.display = 'none'; mobileCheatInput.blur();
         });
 
         mobileCheatInput.addEventListener('input', (e) => {
@@ -738,7 +757,6 @@
             if(val.includes("CAOS")) { triggerCheat('chaos', 'MODALITÀ CAOS'); e.target.value = ""; }
         });
 
-        // --- UI ---
         function updateLifeUI() {
             const pips = document.querySelectorAll('.life-pip');
             pips.forEach((pip, index) => {
@@ -747,39 +765,28 @@
             });
         }
 
-        // --- GESTORE TRUCCHI ---
         function triggerCheat(type, name) {
             CONFIG.cheats[type] = true;
-            
-            if(type === 'chaos') {
-                scene.fog.color.setHex(0xe76f51);
-                scene.background.setHex(0xe76f51);
-            }
+            if(type === 'chaos') { scene.fog.color.setHex(0xf4a261); scene.background.setHex(0xf4a261); }
             if(type === 'god' || (type === 'chaos' && CONFIG.cheats.god)) {
                 document.getElementById('status-val').innerText = type === 'god' ? "MODALITÀ DIO" : "CAOS";
                 document.getElementById('status-val').style.color = "#e63946";
             }
 
             if(activeCheatTimers[type]) clearTimeout(activeCheatTimers[type]);
-
             const el = document.getElementById('cheat-indicator');
-            el.innerText = `${name} ATTIVATO [25s]`;
-            el.style.opacity = 1;
+            el.innerText = `${name} ATTIVATO [25s]`; el.style.opacity = 1;
 
             let secondsLeft = 25;
             const countdownInterval = setInterval(() => {
-                secondsLeft--;
-                el.innerText = `${name} [${secondsLeft}s]`;
+                secondsLeft--; el.innerText = `${name} [${secondsLeft}s]`;
                 if(secondsLeft <= 0) clearInterval(countdownInterval);
             }, 1000);
 
             activeCheatTimers[type] = setTimeout(() => {
-                CONFIG.cheats[type] = false;
-                clearInterval(countdownInterval);
-                
+                CONFIG.cheats[type] = false; clearInterval(countdownInterval);
                 if(type === 'chaos') {
-                    scene.fog.color.setHex(0x87CEEB);
-                    scene.background.setHex(0x87CEEB);
+                    scene.fog.color.setHex(0x70c5ce); scene.background.setHex(0x70c5ce);
                     if(!CONFIG.cheats.god && STATE.playing) {
                         document.getElementById('status-val').innerText = "IN MARCIA";
                         document.getElementById('status-val').style.color = "#1d3557";
@@ -789,20 +796,18 @@
                     document.getElementById('status-val').innerText = "IN MARCIA";
                     document.getElementById('status-val').style.color = "#1d3557";
                 }
-
                 el.innerText = `${name} DISATTIVATO`;
                 setTimeout(() => el.style.opacity = 0, 2000);
-
             }, 25000);
         }
 
-        // --- TASTIERA DESKTOP ---
         document.addEventListener('keydown', (e) => {
             if(!STATE.playing || STATE.gameOver) return;
             const k = e.key.toLowerCase();
             if(k === 'a' || k === 'arrowleft') keys.a = true;
             if(k === 'd' || k === 'arrowright') keys.d = true;
             if(k === ' ') keys.space = true;
+            if(k === 'e') performJump();
 
             STATE.cheatBuffer += k;
             if(STATE.cheatBuffer.length > 10) STATE.cheatBuffer = STATE.cheatBuffer.slice(-10);
@@ -819,175 +824,220 @@
             if(k === ' ') keys.space = false;
         });
 
-        // --- GESTIONE FINE PARTITA ---
         function gameOver() {
-            STATE.playing = false;
-            STATE.gameOver = true;
+            STATE.playing = false; STATE.gameOver = true;
             if(spawnTimer) clearInterval(spawnTimer);
+            if(itemTimer) clearInterval(itemTimer);
+            if(rampTimer) clearInterval(rampTimer);
+            document.getElementById('final-coins').innerText = STATE.coins;
             document.getElementById('game-over-screen').style.display = 'flex';
         }
 
         function restartGame() {
-            STATE.playing = true;
-            STATE.gameOver = false;
-            STATE.lives = 6;
-            STATE.score = 0;
-            STATE.randomCheatTriggered = false;
+            STATE.playing = true; STATE.gameOver = false; STATE.lives = 6;
+            STATE.score = 0; STATE.coins = 0; STATE.jumping = false;
+            STATE.jumpY = 0; STATE.jumpVelY = 0;
+            STATE.magnetActive = false; STATE.shieldActive = false;
+            document.getElementById('badge-magnet').style.display = 'none';
+            document.getElementById('badge-shield').style.display = 'none';
+            carGroup.getObjectByName("shieldMesh").visible = false;
             STATE.startTime = clock.getElapsedTime(); 
             
             updateLifeUI();
-            
+            document.getElementById('coins-val').innerText = "0";
             CONFIG.speed.current = CONFIG.speed.base;
-            playerX = 0;
-            playerVelX = 0;
-            carGroup.position.x = 0;
+            playerX = 0; playerVelX = 0;
+            carGroup.position.set(0, 0, 0);
 
-            enemies.forEach(e => scene.remove(e));
-            enemies.length = 0;
+            enemies.forEach(e => scene.remove(e)); enemies.length = 0;
+            coins.forEach(c => scene.remove(c)); coins.length = 0;
+            powerups.forEach(p => scene.remove(p)); powerups.length = 0;
+            ramps.forEach(r => scene.remove(r)); ramps.length = 0;
 
             document.getElementById('game-over-screen').style.display = 'none';
-            startSpawning(); // Riavvia la generazione del traffico
+            startSpawning();
         }
 
         document.getElementById('restart-btn').addEventListener('click', restartGame);
 
-        // --- LOOP PRINCIPALE ---
+        // ANIMAZIONE PRINCIPALE
         const clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
+            const delta = Math.min(clock.getDelta(), 0.1);
             const time = clock.getElapsedTime();
 
             if (STATE.playing) {
                 const playTime = time - STATE.startTime; 
                 document.getElementById('time-val').innerText = playTime.toFixed(1);
+
+                if(STATE.magnetActive) {
+                    STATE.magnetTimer -= delta;
+                    if(STATE.magnetTimer <= 0) {
+                        STATE.magnetActive = false;
+                        document.getElementById('badge-magnet').style.display = 'none';
+                    }
+                }
             }
 
-            // Mondo e Movimento
             let activeSpeed = STATE.playing ? CONFIG.speed.current : 0; 
-            const moveSpeed = activeSpeed * 80 * delta;
+            const moveSpeed = activeSpeed * 90 * delta;
             
-            stripes.forEach(s => { s.position.z += moveSpeed; if(s.position.z > 20) s.position.z -= 40; });
-            
-            buildings.forEach(b => {
-                b.position.z += moveSpeed;
-                if(b.position.z > 50) b.position.z = -600; 
-                if(CONFIG.cheats.chaos) b.rotation.y += 0.05;
-                else b.rotation.y = 0;
-            });
+            stripes.forEach(s => { s.position.z += moveSpeed; if(s.position.z > 10) s.position.z -= 400; });
+            buildings.forEach(b => { b.position.z += moveSpeed; if(b.position.z > 20) b.position.z -= 750; });
+            props.forEach(p => { p.position.z += moveSpeed; if(p.position.z > 20) p.position.z -= 750; });
 
-            // Controlli Giocatore
+            if (STATE.jumping) {
+                STATE.jumpY += STATE.jumpVelY * delta;
+                STATE.jumpVelY -= STATE.gravity * delta;
+                if (STATE.jumpY <= 0) { STATE.jumpY = 0; STATE.jumpVelY = 0; STATE.jumping = false; }
+            }
+
             if(STATE.playing && !STATE.gameOver) {
-                if(keys.a) playerVelX -= 60 * delta;
-                if(keys.d) playerVelX += 60 * delta;
-                playerVelX *= 0.90; 
-                playerX += playerVelX * delta;
-                const limit = CONFIG.laneWidth * 1.6;
+                if(keys.a) playerVelX -= 45 * delta;
+                if(keys.d) playerVelX += 45 * delta;
+                playerVelX *= 0.88; playerX += playerVelX * delta;
+                
+                const limit = CONFIG.laneWidth * 1.35;
                 if(playerX > limit) { playerX = limit; playerVelX = 0; }
                 if(playerX < -limit) { playerX = -limit; playerVelX = 0; }
 
                 carGroup.position.x = playerX;
-                carGroup.rotation.z = -playerVelX * 0.02; 
-                carGroup.rotation.y = -playerVelX * 0.01;
-                carGroup.userData.wheels.forEach(w => w.rotation.x += activeSpeed * 0.5);
+                carGroup.position.y = STATE.jumpY;
+
+                carGroup.rotation.x = STATE.jumping ? -STATE.jumpVelY * 0.02 : 0;
+                carGroup.rotation.z = -playerVelX * 0.04; 
+                carGroup.rotation.y = -playerVelX * 0.02;
+                carGroup.userData.wheels.forEach(w => w.rotation.x += activeSpeed * 0.6);
             }
 
-            // Turbo
             let isBoosting = false;
             const nitroAvailable = CONFIG.nitro.amount > 0 || CONFIG.cheats.infinite;
             if(keys.space && nitroAvailable && STATE.playing) {
                 isBoosting = true;
-                CONFIG.speed.current = THREE.MathUtils.lerp(CONFIG.speed.current, CONFIG.speed.nitro, 0.08);
+                CONFIG.speed.current = THREE.MathUtils.lerp(CONFIG.speed.current, CONFIG.speed.nitro, 0.06);
                 if(!CONFIG.cheats.infinite) CONFIG.nitro.amount -= CONFIG.nitro.drain;
                 else CONFIG.nitro.amount = 100; 
-                CONFIG.camera.shake = 0.1;
-                camera.fov = THREE.MathUtils.lerp(camera.fov, CONFIG.camera.fovNitro, 0.05);
+                CONFIG.camera.shake = 0.08;
+                camera.fov = THREE.MathUtils.lerp(camera.fov, CONFIG.camera.fovNitro, 0.06);
             } else {
-                CONFIG.speed.current = THREE.MathUtils.lerp(CONFIG.speed.current, CONFIG.speed.base, 0.04);
+                CONFIG.speed.current = THREE.MathUtils.lerp(CONFIG.speed.current, CONFIG.speed.base, 0.03);
                 if(!CONFIG.cheats.infinite) CONFIG.nitro.amount = Math.min(100, CONFIG.nitro.amount + CONFIG.nitro.regen);
-                camera.fov = THREE.MathUtils.lerp(camera.fov, CONFIG.camera.fovBase, 0.05);
+                camera.fov = THREE.MathUtils.lerp(camera.fov, CONFIG.camera.fovBase, 0.06);
             }
             camera.updateProjectionMatrix();
 
             document.getElementById('nitro-fill').style.transform = `scaleX(${CONFIG.nitro.amount / 100})`;
             
             if (STATE.playing) {
-                document.getElementById('speed-val').innerText = Math.floor(CONFIG.speed.current * 100);
-                STATE.score += Math.floor(CONFIG.speed.current * 2);
-                document.getElementById('score-val').innerText = STATE.score;
+                document.getElementById('speed-val').innerText = Math.floor(CONFIG.speed.current * 130);
+                STATE.score += Math.floor(CONFIG.speed.current * 3);
+                document.getElementById('score-val').innerText = STATE.score + ' m';
             }
 
             exhaust.visible = isBoosting;
-            if(isBoosting) {
-                exhaust.scale.set(1, 1 + Math.random(), 1);
+            if(isBoosting) exhaust.scale.set(1, 1 + Math.random() * 0.8, 1);
+
+            // LOGICA RAMPE
+            for(let i=ramps.length-1; i>=0; i--) {
+                const r = ramps[i];
+                r.position.z += moveSpeed;
+                if(Math.abs(r.position.z - carGroup.position.z) < 2.0 && Math.abs(r.position.x - carGroup.position.x) < 1.5 && STATE.jumpY < 0.5) {
+                    performJump(18.0); // Salto potente da rampa
+                    CONFIG.speed.current = CONFIG.speed.nitro;
+                }
+                if(r.position.z > 20) { scene.remove(r); ramps.splice(i, 1); }
             }
 
-            // Logica Nemici (Traffico)
+            // LOGICA POWERUPS
+            for(let i=powerups.length-1; i>=0; i--) {
+                const p = powerups[i];
+                p.position.z += moveSpeed;
+                p.rotation.y += 2 * delta;
+                if(Math.abs(p.position.z - carGroup.position.z) < 2.0 && Math.abs(p.position.x - carGroup.position.x) < 1.5) {
+                    if(p.userData.type === 'magnet') {
+                        STATE.magnetActive = true;
+                        STATE.magnetTimer = 10.0;
+                        document.getElementById('badge-magnet').style.display = 'block';
+                    } else if(p.userData.type === 'shield') {
+                        STATE.shieldActive = true;
+                        document.getElementById('badge-shield').style.display = 'block';
+                        carGroup.getObjectByName("shieldMesh").visible = true;
+                    }
+                    scene.remove(p); powerups.splice(i, 1);
+                } else if(p.position.z > 20) { scene.remove(p); powerups.splice(i, 1); }
+            }
+
+            // LOGICA MONETE (Magnetismo supportato)
+            for(let i=coins.length-1; i>=0; i--) {
+                const c = coins[i];
+                c.position.z += moveSpeed;
+                c.rotation.z += 3 * delta;
+
+                if(STATE.magnetActive) {
+                    const dist = c.position.distanceTo(carGroup.position);
+                    if(dist < 15) {
+                        c.position.lerp(carGroup.position, 0.15);
+                    }
+                }
+
+                if(Math.abs(c.position.z - carGroup.position.z) < 2.0 && Math.abs(c.position.x - carGroup.position.x) < 1.5 && STATE.jumpY < 2.5) {
+                    scene.remove(c); coins.splice(i, 1);
+                    STATE.coins += 1; document.getElementById('coins-val').innerText = STATE.coins;
+                } else if(c.position.z > 20) { scene.remove(c); coins.splice(i, 1); }
+            }
+
+            // LOGICA TRAFFICO NEMICO
             for(let i=enemies.length-1; i>=0; i--){
                 const e = enemies[i];
                 const enemySpeed = STATE.playing ? CONFIG.speed.current : 0;
-                
-                e.position.z += (enemySpeed * 80 - 30) * delta; 
-                e.userData.wheels.forEach(w => w.rotation.x += 0.2);
-                
-                if(Math.random() < 0.005) e.userData.targetX = (Math.random() - 0.5) * 8;
-                if(e.userData.targetX !== undefined) e.position.x += (e.userData.targetX - e.position.x) * 0.03;
-                
-                if(CONFIG.cheats.chaos) e.position.x += Math.sin(time * 5) * 0.2;
+                e.position.z += (enemySpeed * 90 - 35) * delta; 
+                e.userData.wheels.forEach(w => w.rotation.x += 0.3);
 
-                if(Math.abs(e.position.z - carGroup.position.z) < 3.8 && Math.abs(e.position.x - carGroup.position.x) < 2.0) {
-                    if(!CONFIG.cheats.god && STATE.playing) {
+                const isOverEnemy = STATE.jumpY > 1.4;
+                
+                if(!isOverEnemy && Math.abs(e.position.z - carGroup.position.z) < 3.6 && Math.abs(e.position.x - carGroup.position.x) < 1.8) {
+                    if(STATE.shieldActive) {
+                        STATE.shieldActive = false;
+                        document.getElementById('badge-shield').style.display = 'none';
+                        carGroup.getObjectByName("shieldMesh").visible = false;
+                        createCrashEffect(e.position);
+                        scene.remove(e); enemies.splice(i, 1);
+                    } else if(!CONFIG.cheats.god && STATE.playing) {
                         createCrashEffect(carGroup.position);
-                        STATE.lives--;
-                        updateLifeUI();
+                        STATE.lives--; updateLifeUI();
+                        CONFIG.speed.current *= 0.25; CONFIG.camera.shake = 0.6;
                         
-                        CONFIG.speed.current *= 0.3; 
-                        CONFIG.camera.shake = 0.5;
-                        document.querySelector('.warning-text').style.display = 'block';
-                        setTimeout(() => document.querySelector('.warning-text').style.display = 'none', 500);
+                        const warn = document.getElementById('collision-warn');
+                        warn.style.display = 'block'; warn.style.opacity = '1';
+                        setTimeout(() => { warn.style.opacity = '0'; setTimeout(() => warn.style.display = 'none', 400); }, 600);
                         
-                        e.position.z += 15;
-                        e.position.x += (e.position.x > carGroup.position.x) ? 3 : -3;
-                        e.rotation.y += (Math.random() - 0.5);
-
+                        e.position.z += 12;
+                        e.position.x += (e.position.x > carGroup.position.x) ? 2.5 : -2.5;
                         if(STATE.lives <= 0) gameOver();
                     } else if (CONFIG.cheats.god) {
-                        createCrashEffect(e.position);
-                        scene.remove(e);
-                        enemies.splice(i, 1);
-                        STATE.score += 50;
+                        createCrashEffect(e.position); scene.remove(e); enemies.splice(i, 1); STATE.score += 100;
                     }
                 }
-                
-                if(e.position.z > 20) {
-                    scene.remove(e);
-                    enemies.splice(i, 1);
-                }
+                if(e.position.z > 20) { scene.remove(e); enemies.splice(i, 1); }
             }
 
-            // Particelle (Danni/Fumo)
             for(let i=particles.length-1; i>=0; i--){
                 const p = particles[i];
                 p.position.add(p.userData.vel);
-                p.userData.vel.y -= 0.05; 
-                p.rotation.x += 0.1;
-                p.rotation.y += 0.1;
-                p.scale.multiplyScalar(0.95);
-                if(p.scale.x < 0.05 || p.position.y < 0) {
-                    scene.remove(p);
-                    particles.splice(i, 1);
-                }
+                p.userData.vel.y -= 0.1;
+                p.rotation.x += 0.1; p.rotation.y += 0.1; p.scale.multiplyScalar(0.92);
+                if(p.scale.x < 0.04 || p.position.y < 0) { scene.remove(p); particles.splice(i, 1); }
             }
 
-            // Camera Dinamica
             const shakeX = (Math.random() - 0.5) * CONFIG.camera.shake;
             const shakeY = (Math.random() - 0.5) * CONFIG.camera.shake;
             CONFIG.camera.shake *= 0.9;
-            camera.position.x = THREE.MathUtils.lerp(camera.position.x, playerX * 0.3 + shakeX, 0.1);
-            camera.position.y = 3.5 + shakeY;
-            camera.position.z = 9 + CONFIG.speed.current * 1.5;
-            camera.lookAt(playerX * 0.1, 0, -20);
+            camera.position.x = THREE.MathUtils.lerp(camera.position.x, playerX * 0.35 + shakeX, 0.08);
+            camera.position.y = 4.0 + shakeY + STATE.jumpY * 0.4;
+            camera.position.z = 10 + CONFIG.speed.current * 1.8;
+            camera.lookAt(playerX * 0.1, 0.8 + STATE.jumpY * 0.3, -15);
 
             renderer.render(scene, camera);
         }
