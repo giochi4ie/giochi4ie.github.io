@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivio Giochi - Libreria Digitale</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        neutral: {
+                            850: '#1f1f23',
+                            925: '#121215',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-neutral-925 text-neutral-100 min-h-screen selection:bg-neutral-700 selection:text-white dark:bg-neutral-925 dark:text-neutral-100 light:bg-neutral-50 light:text-neutral-900 transition-colors duration-200">
+
+    <div class="bg-grid-pattern fixed inset-0 pointer-events-none z-0 opacity-70"></div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="relative z-10 flex flex-col min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- HEADER / NAVIGATION -->
+        <header class="py-6 border-b border-neutral-800/60 dark:border-neutral-800/60 light:border-neutral-200 flex flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('library')">
+                <div class="w-9 h-9 rounded-lg bg-neutral-100 text-neutral-900 dark:bg-white dark:text-black flex items-center justify-center font-bold text-lg shadow-sm">
+                    <i data-lucide="gamepad-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-neutral-100 dark:text-white light:text-neutral-900">Archivio Giochi</h1>
+                    <p class="text-xs text-neutral-400 dark:text-neutral-400 light:text-neutral-500 font-medium">Libreria Digitale Personale</p>
+                </div>
+            </div>
+
+            <!-- Header Theme Switcher -->
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleTheme()" class="p-2 rounded-lg border border-neutral-800 dark:border-neutral-800 light:border-neutral-300 hover:bg-neutral-800/50 dark:hover:bg-neutral-800/50 light:hover:bg-neutral-200/60 text-neutral-400 hover:text-neutral-200 transition" title="Cambia Tema">
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- APP CONTENT AREA -->
+        <main class="flex-1 py-8">
+            
+            <!-- VIEW 1: CATALOG / LIBRARY -->
+            <section id="view-library" class="space-y-6">
+                
+                <!-- Stats Banner -->
+                <div class="flex items-center justify-between p-4 rounded-xl bg-neutral-900/60 dark:bg-neutral-900/60 light:bg-white border border-neutral-800/60 dark:border-neutral-800/60 light:border-neutral-200/80 shadow-sm backdrop-blur-sm">
+                    <div>
+                        <span class="block text-xs text-neutral-400 dark:text-neutral-400 light:text-neutral-500 font-medium uppercase tracking-wider">Catalogo Disponibile</span>
+                        <span id="stat-total" class="text-2xl font-bold text-neutral-100 dark:text-white light:text-neutral-900 mt-1 block">0 Titoli</span>
+                    </div>
+                    <div class="text-xs text-neutral-500 font-medium hidden sm:block">
+                        Seleziona un titolo per visualizzare dettagli ed eseguibile.
+                    </div>
+                </div>
+
+                <!-- Controls & Filters Bar -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                    <!-- Search Input -->
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"></i>
+                        <input type="text" id="search-input" oninput="renderLibrary()" placeholder="Cerca per titolo, genere o sviluppatore..." class="w-full pl-10 pr-4 py-2.5 bg-neutral-900 dark:bg-neutral-900 light:bg-white border border-neutral-800 dark:border-neutral-800 light:border-neutral-300 rounded-lg text-sm text-neutral-200 dark:text-neutral-200 light:text-neutral-900 focus:outline-none focus:border-neutral-500 transition placeholder-neutral-500">
+                    </div>
+
+                    <!-- Genre Filter Dropdown -->
+                    <div class="w-full sm:w-48">
+                        <select id="filter-genre" onchange="renderLibrary()" class="w-full bg-neutral-900 dark:bg-neutral-900 light:bg-white border border-neutral-800 dark:border-neutral-800 light:border-neutral-300 rounded-lg px-3 py-2.5 text-xs font-medium text-neutral-300 dark:text-neutral-300 light:text-neutral-700 focus:outline-none focus:border-neutral-500 transition">
+                            <option value="ALL">Tutti i Generi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Games Grid Section -->
+                <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pt-2">
+                    <!-- Cards injected dynamically via JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden text-center py-16 px-4 border border-dashed border-neutral-800 rounded-2xl">
+                    <i data-lucide="ghost" class="w-10 h-10 mx-auto text-neutral-500 mb-3"></i>
+                    <h3 class="text-base font-semibold text-neutral-300">Nessun gioco trovato</h3>
+                    <p class="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">Nessun risultato corrisponde ai criteri di ricerca. Prova a reimpostare i filtri.</p>
+                </div>
+            </section>
+
+            <!-- VIEW 2: GAME DETAIL PAGE -->
+            <section id="view-detail" class="hidden space-y-6 fade-enter">
+                
+                <!-- Back Button Bar -->
+                <div class="flex items-center justify-between">
+                    <button onclick="navigateTo('library')" class="inline-flex items-center space-x-2 text-xs font-medium text-neutral-400 hover:text-white dark:hover:text-white light:hover:text-black transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Torna alla Libreria</span>
+                    </button>
+                </div>
+
+                <!-- Hero Section Banner -->
+                <div class="relative w-full rounded-2xl overflow-hidden border border-neutral-800/80 dark:border-neutral-800/80 light:border-neutral-200 bg-neutral-900 min-h-[320px] md:min-h-[380px] flex items-end">
+                    <!-- Background Hero Image -->
+                    <div id="detail-backdrop" class="absolute inset-0 bg-cover bg-center filter brightness-50 transition-all duration-500"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent"></div>
+
+                    <!-- Content Overlay -->
+                    <div class="relative z-10 p-6 md:p-8 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div class="flex flex-col md:flex-row items-start md:items-end gap-5">
+                            <!-- Poster Cover -->
+                            <img id="detail-cover" src="" alt="Poster" class="w-28 h-40 md:w-36 md:h-52 object-cover rounded-xl shadow-2xl border border-neutral-700/50 flex-shrink-0">
+                            
+                            <!-- Header Text -->
+                            <div class="space-y-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span id="detail-genre" class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/10 text-white backdrop-blur-md border border-white/10"></span>
+                                    <span id="detail-year" class="text-xs font-medium text-neutral-300"></span>
+                                </div>
+                                <h2 id="detail-title" class="text-2xl md:text-4xl font-extrabold text-white tracking-tight"></h2>
+                                <p id="detail-developer" class="text-xs text-neutral-300 font-medium"></p>
+                            </div>
+                        </div>
+
+                        <!-- CTA Play Button -->
+                        <div class="w-full md:w-auto">
+                            <button onclick="launchCurrentGame()" class="w-full md:w-auto px-8 py-3.5 bg-white text-black hover:bg-neutral-200 rounded-xl font-bold text-sm tracking-wide flex items-center justify-center space-x-2 shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+                                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                                <span>GIOCA ORA</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Grid Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+                    
+                    <!-- Left: Description & Media -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="p-6 rounded-xl bg-neutral-900/60 dark:bg-neutral-900/60 light:bg-white border border-neutral-800/60 dark:border-neutral-800/60 light:border-neutral-200">
+                            <h3 class="text-xs font-semibold text-neutral-400 dark:text-neutral-400 light:text-neutral-500 uppercase tracking-wider mb-3">Informazioni sul Gioco</h3>
+                            <p id="detail-description" class="text-sm leading-relaxed text-neutral-300 dark:text-neutral-300 light:text-neutral-700 font-normal whitespace-pre-line"></p>
+                        </div>
+
+                        <!-- Screenshots Gallery -->
+                        <div class="p-6 rounded-xl bg-neutral-900/60 dark:bg-neutral-900/60 light:bg-white border border-neutral-800/60 dark:border-neutral-800/60 light:border-neutral-200">
+                            <h3 class="text-xs font-semibold text-neutral-400 dark:text-neutral-400 light:text-neutral-500 uppercase tracking-wider mb-4">Galleria Screenshot</h3>
+                            <div id="detail-gallery" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Screenshots injected dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Metadata Sidebar -->
+                    <div class="space-y-4">
+                        <div class="p-5 rounded-xl bg-neutral-900/60 dark:bg-neutral-900/60 light:bg-white border border-neutral-800/60 dark:border-neutral-800/60 light:border-neutral-200 space-y-4">
+                            <h3 class="text-xs font-semibold text-neutral-400 dark:text-neutral-400 light:text-neutral-500 uppercase tracking-wider border-b border-neutral-800 dark:border-neutral-800 light:border-neutral-200 pb-2">Scheda Tecnica</h3>
+                            
+                            <div>
+                                <span class="text-[11px] text-neutral-500 block">Sviluppatore</span>
+                                <span id="meta-developer" class="text-xs font-medium text-neutral-200 dark:text-neutral-200 light:text-neutral-800"></span>
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-neutral-500 block">Editore</span>
+                                <span id="meta-publisher" class="text-xs font-medium text-neutral-200 dark:text-neutral-200 light:text-neutral-800"></span>
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-neutral-500 block">Data di Uscita</span>
+                                <span id="meta-release" class="text-xs font-medium text-neutral-200 dark:text-neutral-200 light:text-neutral-800"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="py-8 border-t border-neutral-800/60 dark:border-neutral-800/60 light:border-neutral-200 mt-auto flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
+            <p>© 2026 Archivio Giochi — Catalogo Digitale Minimale</p>
+            <p class="font-medium">Design Polito & Pulito</p>
+        </footer>
+
+    </div>
+
+    <!-- MODAL: GAME LAUNCHER / PLAY FRAME -->
+    <div id="play-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col hidden opacity-0 transition-opacity duration-300">
+        <div class="px-6 py-3 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span id="play-title-header" class="text-sm font-bold text-white"></span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Sessione Attiva</span>
+            </div>
+            <button onclick="closePlayModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-neutral-200 transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>Chiudi Esecuzione</span>
+            </button>
+        </div>
+
+        <div class="flex-1 w-full h-full relative overflow-hidden bg-black flex items-center justify-center">
+            <div id="launcher-container" class="w-full h-full flex items-center justify-center">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
